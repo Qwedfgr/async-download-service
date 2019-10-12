@@ -3,6 +3,8 @@ import asyncio
 import functools
 import logging
 import os
+import signal
+
 
 import aiofiles
 from aiohttp import web
@@ -41,9 +43,19 @@ async def archivate(request, delay, path):
             logging.debug('Sending archive chunk ...')
             if delay:
                 await asyncio.sleep(int(delay))
-        return response
-    except asyncio.CancelledError:
-        process.terminate()
+            return response
+    except (ConnectionResetError, asyncio.CancelledError):
+        logging.debug('Download was interrupted')
+        raise
+    finally:
+        try:
+            os.kill(process.pid, signal.SIGKILL)
+        except OSError:
+            pass
+        response.force_close()
+        logging.debug('Download finished')
+
+
 
 
 async def handle_index_page(request):
