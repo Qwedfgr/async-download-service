@@ -17,9 +17,9 @@ async def archivate(request, delay, path):
         reason = 'No archive in {}!'.format(path_to_archive)
         raise web.HTTPNotFound(reason=reason)
 
-    cmd = 'zip -r -{}'.format(path_to_archive)
+    cmd = ("zip", "-jr", "-", f"{path_to_archive}")
     process = await asyncio.create_subprocess_exec(
-        cmd,
+        *cmd,
         stdout=asyncio.subprocess.PIPE
     )
 
