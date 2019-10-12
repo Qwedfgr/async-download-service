@@ -32,7 +32,6 @@ async def archivate(request, delay, path):
     response.headers["Content-Type"] = content_type
     response.headers['Content-Disposition'] = headers
     await response.prepare(request)
-
     try:
         while True:
             chunk = await process.stdout.read(chunk_size)
@@ -43,7 +42,6 @@ async def archivate(request, delay, path):
             logging.debug('Sending archive chunk ...')
             if delay:
                 await asyncio.sleep(int(delay))
-            return response
     except (ConnectionResetError, asyncio.CancelledError):
         logging.debug('Download was interrupted')
         raise
@@ -54,8 +52,7 @@ async def archivate(request, delay, path):
             pass
         response.force_close()
         logging.debug('Download finished')
-
-
+    return response
 
 
 async def handle_index_page(request):
